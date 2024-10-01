@@ -93,6 +93,11 @@ local function drawBorder(x, y, w, h, title)
 end
 
 local function showLog(text)
+    if y == 50 then
+        gpu.fill(2, 2, width - 2, height - 2, ' ')
+        y = 3
+    end
+
     gpu.set(3, y, text)
 
     y = y + 1
@@ -127,18 +132,21 @@ while true do
 
         if message['version'] == nil or message['version'] ~= version then
             send(address, { error = true, message = 'The server and client do not have the same version !' })
+            showLog('Request rejected, incompatible version')
         end
 
         if message['name'] ~= nil and message['name'] ~= '' then
             if message['action'] == 'register' then
                 register(address, message['name'])
                 send(address, { action = message['action'], response = true })
+                showLog('Registering "' .. message['name'] .. '" to "' .. address .. '"')
             end
 
             if message['action'] == 'lookup' then
                 local result = lookup(message['name'])
 
                 send(address, { action = message['action'], response = result, found = result ~= nil })
+                showLog('"' .. address .. '" lookep up "' .. message['name'] .. '" (Reponse : "' .. result .. '")')
             end
         end
 
@@ -146,6 +154,7 @@ while true do
             local result = rlookup(message['address'])
 
             send(address, { action = message['action'], response = result, found = result ~= nil })
+            showLog('"' .. address .. '" reverse lookep up "' .. message['address'] .. '" (Reponse : "' .. result .. '")')
         end
     end
 end
